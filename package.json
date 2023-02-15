@@ -15,7 +15,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "express-async-handler": "^1.2.0",
     "joi": "^17.7.1",
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.0.1",
