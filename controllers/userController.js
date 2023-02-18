@@ -1,9 +1,11 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const otpGenerator = require("otp-generator");
 const User = require("../models/userModel");
 const {
   registerValidation,
   loginValidation,
+  emailValidation,
 } = require("../services/userValidation");
 
 const registerUser = async (req, res, next) => {
@@ -48,6 +50,28 @@ const loginUser = async (req, res) => {
   res.header("auth-token", token).json({ token: token });
 };
 
+const generateOTP = async (req, res) => {
+  const { error } = emailValidation(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  // Check if email exist
+  const user = await User.findOne({ email: req.body.email });
+  if (!user)
+    return res
+      .status(400)
+      .json({ error: "Email not found, create an account first" });
+
+  const OTP = otpGenerator.generate(6, {
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
+
+  res.send(OTP);
+};
+
+const verifyOTP = (req, res) => {};
+
 const getMe = (req, res) => {
   res.send(req.user);
 };
@@ -55,5 +79,6 @@ const getMe = (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
+  generateOTP,
   getMe,
 };

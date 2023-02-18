@@ -17,7 +17,15 @@ const loginValidation = (data) => {
   return schema.validate(data);
 };
 
+const emailValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string().min(10).max(50).email(),
+  });
+  return schema.validate(data);
+};
+
 module.exports = {
   registerValidation,
   loginValidation,
+  emailValidation,
 };
