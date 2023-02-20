@@ -85,6 +85,22 @@ const verifyOTP = async (req, res) => {
   return res.send("not verified");
 };
 
+const resetPassword = async (req, res, next) => {
+  // Hash password
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(req.body.password, salt);
+  try {
+    const user = await User.findOneAndUpdate(
+      req.body.email,
+      { password: hashedPassword },
+      { new: true }
+    );
+    res.json(user.data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getMe = (req, res) => {
   res.send(req.user);
 };
@@ -94,5 +110,6 @@ module.exports = {
   loginUser,
   generateOTP,
   verifyOTP,
+  resetPassword,
   getMe,
 };
