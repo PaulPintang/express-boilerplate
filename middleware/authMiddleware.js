@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const protected = (req, res, next) => {
+const Protected = (req, res, next) => {
   const token = req.header("auth-token");
   if (!token) return res.status(401).send("Access Denied");
 
@@ -12,5 +12,15 @@ const protected = (req, res, next) => {
     next(error);
   }
 };
+const localVariables = (req, res, next) => {
+  req.app.locals = {
+    OTP: null,
+    resetSession: false,
+  };
+  next();
+};
 
-module.exports = protected;
+module.exports = {
+  Protected,
+  localVariables,
+};

@@ -7,6 +7,7 @@ const {
   loginValidation,
   emailValidation,
 } = require("../services/userValidation");
+const sendEmail = require("../services/sendEmail");
 
 const registerUser = async (req, res, next) => {
   // VALIDATION
@@ -61,16 +62,28 @@ const generateOTP = async (req, res) => {
       .status(400)
       .json({ error: "Email not found, create an account first" });
 
-  const OTP = otpGenerator.generate(6, {
+  req.app.locals.OTP = await otpGenerator.generate(6, {
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
     specialChars: false,
   });
 
-  res.send(OTP);
+  // const data = {
+  //   email: req.body.email,
+  //   OTP: OTP,
+  // };
+
+  // sendEmail(data);
+  res.send(req.app.locals.OTP);
 };
 
-const verifyOTP = (req, res) => {};
+const verifyOTP = async (req, res) => {
+  // if verified reset session
+  const { OTP } = req.query;
+  if (parseInt(req.app.locals.OTP) === parseInt(OTP))
+    return res.send("verified");
+  return res.send("not verified");
+};
 
 const getMe = (req, res) => {
   res.send(req.user);
@@ -80,5 +93,6 @@ module.exports = {
   registerUser,
   loginUser,
   generateOTP,
+  verifyOTP,
   getMe,
 };

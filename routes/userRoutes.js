@@ -5,12 +5,15 @@ const {
   loginUser,
   generateOTP,
   getMe,
+  verifyOTP,
 } = require("../controllers/userController");
-const protected = require("../middleware/authMiddleware");
+const { Protected } = require("../middleware/authMiddleware");
+const sendEmail = require("../services/sendEmail");
 
 router.post("/", registerUser);
 router.post("/login", loginUser);
-router.post("/recover", generateOTP);
-router.get("/me", protected, getMe);
+router.post("/recover", generateOTP, sendEmail);
+router.get("/verify", verifyOTP);
+router.get("/me", Protected, getMe);
 
 module.exports = router;
