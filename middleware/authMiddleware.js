@@ -15,7 +15,7 @@ const Protected = (req, res, next) => {
 const localVariables = (req, res, next) => {
   req.app.locals = {
     OTP: null,
-    resetSession: false,
+    session: false,
   };
   next();
 };

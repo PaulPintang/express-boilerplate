@@ -6,6 +6,7 @@ const {
   registerValidation,
   loginValidation,
   emailValidation,
+  passValidation,
 } = require("../services/userValidation");
 const sendEmail = require("../services/sendEmail");
 
@@ -68,24 +69,31 @@ const generateOTP = async (req, res) => {
     specialChars: false,
   });
 
-  // const data = {
-  //   email: req.body.email,
-  //   OTP: OTP,
-  // };
+  const data = {
+    email: req.body.email,
+    OTP: req.app.locals.OTP,
+  };
 
-  // sendEmail(data);
-  res.send(req.app.locals.OTP);
+  req.app.locals.OTP && sendEmail(data);
 };
 
 const verifyOTP = async (req, res) => {
   // if verified reset session
   const { OTP } = req.query;
-  if (parseInt(req.app.locals.OTP) === parseInt(OTP))
-    return res.send("verified");
-  return res.send("not verified");
+  if (parseInt(req.app.locals.OTP) === parseInt(OTP)) {
+    req.app.locals.session = true;
+    return res.send(req.app.locals.session);
+  }
+  return res.send(req.app.locals.session);
 };
 
 const resetPassword = async (req, res, next) => {
+  const { error } = passValidation({ password: req.body.password });
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  if (!req.app.locals.session)
+    return res.status(440).send({ error: "Session expired!" });
+
   // Hash password
   const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync(req.body.password, salt);
@@ -96,6 +104,7 @@ const resetPassword = async (req, res, next) => {
       { new: true }
     );
     res.json(user.data);
+    req.app.locals.session = false;
   } catch (error) {
     next(error);
   }

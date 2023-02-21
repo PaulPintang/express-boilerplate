@@ -13,7 +13,7 @@ const sendEmail = require("../services/sendEmail");
 
 router.post("/", registerUser);
 router.post("/login", loginUser);
-router.post("/recover", generateOTP, sendEmail);
+router.post("/recover", generateOTP);
 router.get("/verify", verifyOTP);
 router.put("/reset", resetPassword);
 router.get("/me", Protected, getMe);

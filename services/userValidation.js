@@ -24,8 +24,16 @@ const emailValidation = (data) => {
   return schema.validate(data);
 };
 
+const passValidation = (data) => {
+  const schema = Joi.object({
+    password: Joi.string().min(6).max(1000),
+  });
+  return schema.validate(data);
+};
+
 module.exports = {
   registerValidation,
   loginValidation,
   emailValidation,
+  passValidation,
 };
