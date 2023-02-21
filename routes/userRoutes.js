@@ -9,7 +9,7 @@ const {
   resetPassword,
 } = require("../controllers/userController");
 const { Protected } = require("../middleware/authMiddleware");
-const sendEmail = require("../services/sendEmail");
+// const sendEmail = require("../services/sendEmail");
 
 router.post("/", registerUser);
 router.post("/login", loginUser);
