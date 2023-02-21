@@ -75,6 +75,7 @@ const generateOTP = async (req, res) => {
   };
 
   req.app.locals.OTP && sendEmail(data);
+  res.send().status(200);
 };
 
 const verifyOTP = async (req, res) => {
