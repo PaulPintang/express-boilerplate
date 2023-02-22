@@ -61,7 +61,7 @@ const uploadPicture = async (req, res, next) => {
   const { email, image } = req.body;
   try {
     if (req.body.image !== "") {
-      const current = await User.findOne({ email: req.body.email });
+      const current = await User.findOne(email);
 
       const ImgId = await current.image.public_id;
       if (ImgId) {
@@ -152,7 +152,7 @@ const resetPassword = async (req, res, next) => {
 };
 
 const getMe = async (req, res) => {
-  const user = await User.findById(req.user);
+  const user = await User.findById(req.user._id);
   const { name, email, image } = user;
   res.send({ name, email, image: image.url });
 };
