@@ -61,7 +61,7 @@ const uploadPicture = async (req, res, next) => {
   const { email, image } = req.body;
   try {
     if (req.body.image !== "") {
-      const current = await User.findOne(email);
+      const current = await User.findOne({ email: email });
 
       const ImgId = await current.image.public_id;
       if (ImgId) {
