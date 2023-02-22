@@ -30,6 +30,10 @@ const registerUser = async (req, res, next) => {
       name: req.body.name,
       email: req.body.email,
       password: hashedPassword,
+      image: {
+        public_id: "",
+        url: "",
+      },
     });
     res.json({ user: user._id });
   } catch (error) {
