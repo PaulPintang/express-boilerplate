@@ -9,6 +9,7 @@ const {
   passValidation,
 } = require("../services/userValidation");
 const sendEmail = require("../services/sendEmail");
+const cloudinary = require("../services/cloudinary");
 
 const registerUser = async (req, res, next) => {
   // VALIDATION
@@ -48,8 +49,41 @@ const loginUser = async (req, res) => {
   const isValidPass = await bcrypt.compare(req.body.password, user.password);
   if (!isValidPass) return res.status(400).json({ error: "Invalid password!" });
 
-  const token = jwt.sign({ name: user.name }, process.env.TOKEN_SCRT);
+  const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SCRT);
   res.header("auth-token", token).json({ token: token });
+};
+
+const uploadPicture = async (req, res, next) => {
+  const { email, image } = req.body;
+  try {
+    if (req.body.image !== "") {
+      const current = await User.findOne({ email: req.body.email });
+
+      const ImgId = await current.image.public_id;
+      if (ImgId) {
+        await cloudinary.uploader.destroy(ImgId);
+      }
+    }
+
+    const result = await cloudinary.uploader.upload(image, {
+      folder: "pictures",
+    });
+
+    const user = await User.findOneAndUpdate(
+      email,
+      {
+        image: {
+          public_id: result.public_id,
+          url: result.secure_url,
+        },
+      },
+      { new: true }
+    );
+
+    res.status(201).send(user);
+  } catch (error) {
+    next(error);
+  }
 };
 
 const generateOTP = async (req, res) => {
@@ -113,8 +147,10 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-const getMe = (req, res) => {
-  res.send(req.user);
+const getMe = async (req, res) => {
+  const user = await User.findById(req.user);
+  const { name, email, image } = user;
+  res.send({ name, email, image: image.url });
 };
 
 module.exports = {
@@ -124,4 +160,5 @@ module.exports = {
   verifyOTP,
   resetPassword,
   getMe,
+  uploadPicture,
 };

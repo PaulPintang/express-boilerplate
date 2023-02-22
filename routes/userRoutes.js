@@ -7,6 +7,7 @@ const {
   getMe,
   verifyOTP,
   resetPassword,
+  uploadPicture,
 } = require("../controllers/userController");
 const { Protected } = require("../middleware/authMiddleware");
 // const sendEmail = require("../services/sendEmail");
@@ -17,5 +18,6 @@ router.post("/recover", generateOTP);
 router.get("/verify", verifyOTP);
 router.put("/reset", resetPassword);
 router.get("/me", Protected, getMe);
+router.put("/upload", uploadPicture);
 
 module.exports = router;
