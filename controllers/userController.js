@@ -57,13 +57,31 @@ const loginUser = async (req, res) => {
   res.header("auth-token", token).json({ token: token });
 };
 
-const uploadPicture = async (req, res, next) => {
-  const { email, image } = req.body;
+const deleteAccount = async (req, res, next) => {
   try {
-    if (req.body.image !== "") {
-      const current = await User.findOne({ email: email });
+    const current = await User.findById(req.params.id);
 
-      const ImgId = await current.image.public_id;
+    const ImgId = current.image.public_id;
+
+    if (ImgId) {
+      await cloudinary.uploader.destroy(ImgId);
+    }
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    res.json({ Deleted: user._id });
+  } catch (error) {
+    next(error);
+  }
+};
+const uploadPicture = async (req, res, next) => {
+  const { image, _id } = req.body;
+  try {
+    // delete prev image to cloudinary
+    if (image !== "") {
+      const current = await User.findById(_id);
+
+      const ImgId = current.image.public_id;
+
       if (ImgId) {
         await cloudinary.uploader.destroy(ImgId);
       }
@@ -73,16 +91,12 @@ const uploadPicture = async (req, res, next) => {
       folder: "pictures",
     });
 
-    const user = await User.findOneAndUpdate(
-      email,
-      {
-        image: {
-          public_id: result.public_id,
-          url: result.secure_url,
-        },
+    const user = await User.findByIdAndUpdate(_id, {
+      image: {
+        public_id: result.public_id,
+        url: result.secure_url,
       },
-      { new: true }
-    );
+    });
 
     res.status(201).send(user);
   } catch (error) {
@@ -151,15 +165,20 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-const getMe = async (req, res) => {
-  const user = await User.findById(req.user._id);
-  const { name, email, image } = user;
-  res.send({ name, email, image: image.url });
+const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const { name, email, image, _id } = user;
+    res.send({ name, email, image: image.url, _id });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {
   registerUser,
   loginUser,
+  deleteAccount,
   generateOTP,
   verifyOTP,
   resetPassword,
