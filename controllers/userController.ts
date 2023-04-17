@@ -1,3 +1,4 @@
+import { NextFunction, Request, Response } from "express";
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const otpGenerator = require("otp-generator");
@@ -11,7 +12,11 @@ const {
 const sendEmail = require("../services/sendEmail");
 const cloudinary = require("../services/cloudinary");
 
-const registerUser = async (req, res, next) => {
+const registerUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // VALIDATION
   const { error } = registerValidation(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
@@ -41,7 +46,7 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-const loginUser = async (req, res) => {
+const loginUser = async (req: Request, res: Response) => {
   // VALIDATION
   const { error } = loginValidation(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
@@ -57,7 +62,11 @@ const loginUser = async (req, res) => {
   res.header("auth-token", token).json({ token: token });
 };
 
-const deleteAccount = async (req, res, next) => {
+const deleteAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const current = await User.findById(req.params.id);
 
@@ -73,7 +82,11 @@ const deleteAccount = async (req, res, next) => {
     next(error);
   }
 };
-const uploadPicture = async (req, res, next) => {
+const uploadPicture = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { image, _id } = req.body;
   try {
     // delete prev image to cloudinary
@@ -104,7 +117,7 @@ const uploadPicture = async (req, res, next) => {
   }
 };
 
-const generateOTP = async (req, res) => {
+const generateOTP = async (req: Request, res: Response) => {
   const { error } = emailValidation(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
 
@@ -132,7 +145,10 @@ const generateOTP = async (req, res) => {
   }
 };
 
-const verifyOTP = async (req, res) => {
+const verifyOTP = async (
+  req: Request<{}, {}, {}, { OTP: string }>,
+  res: Response
+) => {
   // if verified reset session
   const { OTP } = req.query;
   if (parseInt(req.app.locals.OTP) === parseInt(OTP)) {
@@ -142,34 +158,38 @@ const verifyOTP = async (req, res) => {
   return res.send(req.app.locals.session);
 };
 
-const resetPassword = async (req, res, next) => {
-  const { error } = passValidation({ password: req.body.password });
-  if (error) return res.status(400).json({ error: error.details[0].message });
-
-  if (!req.app.locals.session)
-    return res.status(440).send({ error: "Session expired!" });
-
+const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { email, password } = req.body;
   // Hash password
   const salt = bcrypt.genSaltSync(10);
-  const hashedPassword = bcrypt.hashSync(req.body.password, salt);
+  const hashedPassword = bcrypt.hashSync(password, salt);
   try {
-    const user = await User.findOneAndUpdate(
-      req.body.email,
-      { password: hashedPassword },
-      { new: true }
+    const user = await User.findOne({ email });
+    await User.findByIdAndUpdate(
+      user._id,
+      {
+        password: hashedPassword,
+      },
+      {
+        new: true,
+      }
     );
-    res.json(user.data);
     req.app.locals.session = false;
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }
 };
 
-const getMe = async (req, res, next) => {
+const profile = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await User.findById(req.user._id);
-    const { name, email, image, _id } = user;
-    res.send({ name, email, image: image.url, _id });
+    const user = await User.findById(res.locals.users._id);
+    const { name, email, image, day, _id } = user;
+    res.json({ name, email, image: image.url, day, _id });
   } catch (error) {
     next(error);
   }
@@ -182,6 +202,6 @@ module.exports = {
   generateOTP,
   verifyOTP,
   resetPassword,
-  getMe,
+  profile,
   uploadPicture,
 };

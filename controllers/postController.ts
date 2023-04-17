@@ -1,6 +1,7 @@
+import { Request, Response, NextFunction } from "express";
 const Post = require("../models/postModel");
 
-const getPost = async (req, res, next) => {
+const getPost = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const posts = await Post.find();
     res.json(posts);
@@ -9,7 +10,7 @@ const getPost = async (req, res, next) => {
   }
 };
 
-const addPost = async (req, res, next) => {
+const addPost = async (req: Request, res: Response, next: NextFunction) => {
   const { title, description } = req.body;
   try {
     const post = await Post.create({
@@ -22,7 +23,7 @@ const addPost = async (req, res, next) => {
   }
 };
 
-const deletePost = async (req, res, next) => {
+const deletePost = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const post = await Post.findByIdAndDelete(req.params.id);
     res.json({ DELETED: post });
@@ -31,7 +32,7 @@ const deletePost = async (req, res, next) => {
   }
 };
 
-const updatePost = async (req, res, next) => {
+const updatePost = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
       title: req.body.title,

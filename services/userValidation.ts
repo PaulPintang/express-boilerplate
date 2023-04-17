@@ -1,6 +1,12 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-const registerValidation = (data) => {
+interface DataInterface {
+  name: string;
+  email: string;
+  password: string;
+}
+
+const registerValidation = (data: DataInterface) => {
   const schema = Joi.object({
     name: Joi.string().min(2).max(30),
     email: Joi.string().min(10).max(50).email(),
@@ -9,7 +15,7 @@ const registerValidation = (data) => {
   return schema.validate(data);
 };
 
-const loginValidation = (data) => {
+const loginValidation = (data: DataInterface) => {
   const schema = Joi.object({
     email: Joi.string().min(10).max(50).email(),
     password: Joi.string().min(6).max(1000),
@@ -17,14 +23,14 @@ const loginValidation = (data) => {
   return schema.validate(data);
 };
 
-const emailValidation = (data) => {
+const emailValidation = (data: DataInterface) => {
   const schema = Joi.object({
     email: Joi.string().min(10).max(50).email(),
   });
   return schema.validate(data);
 };
 
-const passValidation = (data) => {
+const passValidation = (data: DataInterface) => {
   const schema = Joi.object({
     password: Joi.string().min(6).max(1000),
   });
