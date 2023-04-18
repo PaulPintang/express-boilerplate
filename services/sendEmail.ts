@@ -27,4 +27,4 @@ const sendEmail = async (data: DataInterface) => {
   return info.messageId;
 };
 
-module.exports = sendEmail;
+export default sendEmail;

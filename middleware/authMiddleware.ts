@@ -1,27 +1,26 @@
 import { Request, Response, NextFunction } from "express";
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
-const Protected = (req: Request, res: Response, next: NextFunction) => {
+export const Protected = (req: Request, res: Response, next: NextFunction) => {
   const token = req.header("auth-token");
   if (!token) return res.status(401).send("Access Denied");
 
   try {
-    const verified = jwt.verify(token, process.env.TOKEN_SCRT);
+    const verified = jwt.verify(token, process.env.TOKEN_SCRT!);
     res.locals.user = verified;
     next();
   } catch (error) {
     next(error);
   }
 };
-const localVariables = (req: Request, res: Response, next: NextFunction) => {
+export const localVariables = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   req.app.locals = {
     OTP: null,
     session: false,
   };
   next();
-};
-
-module.exports = {
-  Protected,
-  localVariables,
 };

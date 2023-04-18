@@ -1,14 +1,15 @@
 import express from "express";
+import { Protected } from "../middleware/authMiddleware";
 const router = express.Router();
-const {
+import {
   getPost,
   addPost,
   deletePost,
   updatePost,
-} = require("../controllers/postController");
+} from "../controllers/postController";
 
-router.get("/", getPost);
-router.post("/add", addPost);
-router.route("/:id").put(updatePost).delete(deletePost);
+router.get("/", Protected, getPost);
+router.post("/add", Protected, addPost);
+router.route("/:id").put(Protected, updatePost).delete(Protected, deletePost);
 
 module.exports = router;

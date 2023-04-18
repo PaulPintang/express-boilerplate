@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-const {
+import {
   registerUser,
   loginUser,
   generateOTP,
@@ -9,16 +9,16 @@ const {
   resetPassword,
   uploadPicture,
   deleteAccount,
-} = require("../controllers/userController");
-const { Protected } = require("../middleware/authMiddleware");
+} from "../controllers/userController";
+import { Protected } from "../middleware/authMiddleware";
 
 router.post("/", registerUser);
 router.post("/login", loginUser);
 router.post("/recover", generateOTP);
 router.get("/verify", verifyOTP);
 router.put("/reset", resetPassword);
-router.get("/me", Protected, profile);
-router.delete("/me/:id", Protected, deleteAccount);
-router.put("/upload", uploadPicture);
+router.get("/profile", Protected, profile);
+router.put("/profile/update", Protected, uploadPicture);
+router.delete("/profile/:id", Protected, deleteAccount);
 
 module.exports = router;
