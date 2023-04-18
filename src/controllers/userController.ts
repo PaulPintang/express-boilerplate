@@ -2,7 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import otpGenerator from "otp-generator";
-import User, { UserInterface } from "../models/userModel";
+import User from "../models/userModel";
+import { IUser } from "../interfaces/UserInterface";
 import {
   registerValidation,
   loginValidation,
@@ -202,7 +203,7 @@ export const profile = async (
 ) => {
   try {
     const user = await User.findById(res.locals.user._id);
-    const data: UserInterface | null = user;
+    const data: IUser | null = user;
     res.json({
       name: data?.name,
       email: data?.email,
