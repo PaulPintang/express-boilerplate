@@ -8,7 +8,6 @@ import {
   registerValidation,
   loginValidation,
   emailValidation,
-  passValidation,
 } from "../services/userValidation";
 import sendEmail from "../services/sendEmail";
 import cloudinary from "../services/cloudinary";
@@ -48,28 +47,37 @@ export const registerUser = async (
   }
 };
 
-export const loginUser = async (req: Request, res: Response) => {
-  // VALIDATION
-  const { error } = loginValidation(req.body);
-  if (error) return res.status(400).json({ error: error.details[0].message });
+export const loginUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // VALIDATION
+    const { error } = loginValidation(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
 
-  // Check if email exist
-  const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).json({ error: "Email not found!" });
+    // Check if email exist
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(400).json({ error: "Email not found!" });
 
-  const isValidPass = await bcrypt.compare(req.body.password, user.password);
-  if (!isValidPass) return res.status(400).json({ error: "Invalid password!" });
+    const isValidPass = await bcrypt.compare(req.body.password, user.password);
+    if (!isValidPass)
+      return res.status(400).json({ error: "Invalid password!" });
 
-  const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SCRT!, {
-    expiresIn: "30d",
-  });
-  // res.header("auth-token", token).json({ token: token });
-  res.header("auth-token", token).json({
-    name: user.name,
-    email: user.email,
-    image: user.image?.url,
-    token: token,
-  });
+    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SCRT!, {
+      expiresIn: "30d",
+    });
+    // res.header("auth-token", token).json({ token: token });
+    res.header("auth-token", token).json({
+      name: user.name,
+      email: user.email,
+      image: user.image?.url,
+      token: token,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const deleteAccount = async (
@@ -139,7 +147,7 @@ export const generateOTP = async (req: Request, res: Response) => {
       .status(400)
       .json({ error: "Email not found, create an account first" });
 
-  req.app.locals.OTP = await otpGenerator.generate(6, {
+  req.app.locals.OTP = otpGenerator.generate(6, {
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
     specialChars: false,
